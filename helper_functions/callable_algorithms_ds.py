@@ -1,27 +1,22 @@
 '''
 This compute function named as specified.  It currently uses the binary search algorythm
 '''
-def compute_sprite_positions(display, sprites, start=[0,0], call_count=0, verbose=False):
+def compute_sprite_positions(display, sprites, start=[0,0]):
     result_plot_point_list = list()
     result_sprites_in_plot_order = list()
-    result_plot_point_list, result_sprites_in_plot_order = binary_search(display, sprites, start, call_count, verbose)
+    result_plot_point_list, result_sprites_in_plot_order = binary_search(display, sprites, start)
     return result_plot_point_list, result_sprites_in_plot_order
 
 '''
 This uses a recursive binary search to plot sprites
 '''    
-def binary_search(display, sprites, start=[0,0], call_count=0, verbose=False):
+def binary_search(display, sprites, start=[0,0]):
     sprites_to_plot = list()
     raw_plot_point_list = list()
     raw_sprites_in_plot_order = list()
-    if verbose:
-        print('call_count = ', call_count)
-    call_count += 1
 
     sprites_that_fit = [sprite for sprite in sprites if not ((sprite['width'] > display[0]) or (sprite['height'] > display[1]))]
     if len(sprites_that_fit) == 0:
-        if verbose:
-            print('No sprites fit!')
         return list(), list()
     else:
         ## Find largest valid (width < display[0], height < display[1]) sprite
@@ -29,50 +24,31 @@ def binary_search(display, sprites, start=[0,0], call_count=0, verbose=False):
 
         ## Move selected sprite to new list (Find the index of 1st base unit and add it to the list to plot)
         index_of_sprite_to_pop = next((index for (index, d) in enumerate(sprites) if d['image id'] == selected_sprite['image id']), None)
-        if verbose:
-            print('index_of_sprite_to_pop = ', index_of_sprite_to_pop)
         if ~(index_of_sprite_to_pop is None):
             sprites_to_plot.append(sprites.pop(index_of_sprite_to_pop))
 
         ## start location to list and add sprite tuple to list 
         raw_plot_point_list.append((start[0],start[1]))
         raw_sprites_in_plot_order.append((selected_sprite['width'],selected_sprite['height']))
-        if verbose:
-            print('raw_plot_point_list: ', raw_plot_point_list)
-            print('raw_sprites_in_plot_order: ',raw_sprites_in_plot_order)
-
 
         ## Calculate new display_1
         display_1 = (display[0]-selected_sprite['width'], selected_sprite['height'])
-        if verbose:
-            print('display_1 = ', display_1)
         if display_1[0] > 0:
             ## Calculate new start_location_1
             new_start_1 = [start[0] + selected_sprite['width'], start[1]]
-            raw_location_list_1, raw_sprite_list_1 = binary_search(display_1, sprites, new_start_1, call_count, verbose=verbose)
-            if verbose:
-                print('raw_location_list_1: ', raw_location_list_1)
-                print('raw_sprite_list_1: ', raw_sprite_list_1)
+            raw_location_list_1, raw_sprite_list_1 = binary_search(display_1, sprites, new_start_1)
             if raw_location_list_1:
                 for returned_location in raw_location_list_1:
                     raw_plot_point_list.append(returned_location)
                 for returned_sprite in raw_sprite_list_1:
                     raw_sprites_in_plot_order.append(returned_sprite)
-                if verbose:
-                    print('lists updated')
-                    print('sprites = ', sprites)
 
         ## Calculate new display_2
         display_2 = (display[0], display[1]-selected_sprite['height'])
-        if verbose:
-            print('display_2 = ', display_2)
         if display_2[1] > 0:
             ## Calculate new start_location_2
             new_start_2 = [start[0], start[1] + selected_sprite['height']]
-            raw_location_list_2, raw_sprite_list_2 = binary_search(display_2, sprites, new_start_2, call_count, verbose=verbose)
-            if verbose:
-                print('raw_location_list_2: ', raw_location_list_2)
-                print('raw_sprite_list_2: ', raw_sprite_list_2)
+            raw_location_list_2, raw_sprite_list_2 = binary_search(display_2, sprites, new_start_2)
             if len(raw_location_list_2) > 0:
                 for returned_location in raw_location_list_2:
                     raw_plot_point_list.append(returned_location)
